@@ -3,10 +3,9 @@ require 'net/http'
 require "base64"
 require 'thread'
 require 'timeout'
-require './lib/routerFP'
 require './lib/objRpw'
 require './lib/joinThread'
-
+require './lib/routerFP'
 
 routers=[]
 routersCrack=[]
