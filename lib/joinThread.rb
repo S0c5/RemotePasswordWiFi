@@ -4,8 +4,8 @@ def joinThread(thread)
 			Timeout.timeout(10) do       
 				t.join()
 			end
-		rescue
-			puts "Timeout"
+		rescue Timeout::Error
+			puts "[-] Timeout"
 			t.kill()
 		end
 	end

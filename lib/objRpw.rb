@@ -86,9 +86,8 @@ class Rpw
 		rescue Errno::ECONNRESET,Errno::ECONNREFUSED
 			return false
 		end
-	  
-	end
-	    
+		return res
+	end 
 	def login_request(user_name,passwd,url="")
 		
 		uri = URI("http://#{@ip}:#{@port}#{url}")
@@ -101,8 +100,32 @@ class Rpw
 		end
 		return {:response => res,:credential  => {:user => user_name , :password =>  passwd}}
 	end
+	
+	def getPasswordWifi(typeArray)
+	  
+		url=RouterFP.getKeyUrl(@routerType)
+		
+		getHttp(url)
+		data=getHttp(url)
+		ret=[]
+		
+		for type in typeArray
+			regex=RouterFP.getRex(@routerType,type)
+			if passwd=data.body.match(regex)
+				ret << passwd[1]
+			else
+				ret << nil
+			end
+			
+			
+		end
+		return ret
+	end
 	def ip
 		@ip
+	end
+	def port
+		@port
 	end
 	def active
 		@active
