@@ -33,6 +33,7 @@ def getOptions()
 			$nThreads=step.to_i
 		  
 		end
+		o.on('-F ouput file') {|file| $fileOutput=file}
 		o.on('-z Min-Max', 'Min Max Range Ip') do |mM|
 			tmpSplit=mM.split('-')
 			min=tmpSplit[0]
@@ -43,8 +44,6 @@ def getOptions()
 			end
 		end
 		o.on('-h', "Help"){puts o; exit}
-		
-
 		o.parse!
 		if $ipRange.nil?
 			puts o
@@ -53,6 +52,9 @@ def getOptions()
 		if $min.nil? && $max.nil?
 			$min=1
 			$max=255
+		end
+		if $fileOutput.nil?
+			$fileOutput=false
 		end
 		if $nThreads.nil?
 		    $nThreads=50;
@@ -154,8 +156,12 @@ routersCrack.each do |router|
 end
 threads=joinThread(threads)
 puts "[+] password getting: "
+
 routersCrack.each do |router|
 	if !router.routerType.nil?
 		puts "[+] Router #{router.routerType[0..5]}: ip=#{router.ip}\tssid=#{router.ssid}\tWPA=#{router.wifiPassword[:WPA].nil? ? " "*20 : router.wifiPassword[:WPA]}\t WEP=#{router.wifiPassword[:WEP]}"
+	end
+	if $fileOutput!=false
+		File.open($fileOutput,"a+").puts "[*] IP: #{router.ip}\t ssid: #{router.ssid}\t WPA: #{router.wifiPassword[:WPA].nil? ? " "*20 : router.wifiPassword[:WPA]}\t WEP: #{router.wifiPassword[:WEP]}"
 	end
 end
