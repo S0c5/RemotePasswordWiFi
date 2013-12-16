@@ -12,18 +12,18 @@ module RouterFP
 				:keyUrl => "/wlanPrimaryNetwork.asp",
 				:wepRex => /input type=\"input\" name=\"NetworkKey1\" size=\"26\" maxlength=\"26\" value=(\w+)\>/,
 				:wpaRex => /\<input type=\"password\" name=\"WpaPreSharedKey\" size=32 maxlength=64 value=\"([\S]+)\"\>/,
-				:ssidRex => //
+				:ssidRex => /\<input name="ServiceSetIdentifier" size=32 maxlength=32 value="{0,1}([\.\*\@\-\_a-zA-Z#0-9&]+)"{0,1}\>/
 	                    },
 		:technicolor => {
 				:ssidUrl => "/wlanPrimaryNetwork.asp",
 				:keyUrl => "/wlanPrimaryNetwork.asp",
 				:wepRex => /input type=\"input\" name=\"NetworkKey1\" size=\"26\" maxlength=\"26\" value=(\w+)\>/,
 				:wpaRex => /\<input type=\"password\" name=\"WpaPreSharedKey\" size=32 maxlength=64 value=\"([\S]+)\"\>/,
-				:ssidRex => //
+				:ssidRex => /\<input name="ServiceSetIdentifier" size=32 maxlength=32 value="{0,1}([\.\*\@\-\_a-zA-Z#0-9&]+)"{0,1}\>/
 	                         }
 	  }
 	
-	def self.getSSID(typeRouter)
+	def self.getSsidUrl(typeRouter)
 		return @routers[typeRouter][:ssidUrl]
 	end  
 	def self.getKeyUrl(typeRouter)
@@ -42,5 +42,6 @@ module RouterFP
 			return routerTmp["ssidRex".to_sym]
 		end
 	end
+	
 	
 end
