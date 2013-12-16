@@ -177,7 +177,7 @@ class Rpw
 		    return ssid
 		end
 		ssid[0]=""
-		ssid=ssid.scan(/#../).map! {|i| i.gsub("#","").to_i.chr}.join
+		ssid=ssid.split("#").map! {|i| i.to_i.chr}.join
 		return ssid
 	end
 	def ip
