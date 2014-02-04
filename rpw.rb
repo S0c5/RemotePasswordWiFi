@@ -88,7 +88,7 @@ threads=[]
 
 
 
-for i in (1..255)
+for i in ($min..$max)
 	threads << Thread.new(setIp($ipRange,i)) do |ipTmp|
 		tmp=Rpw.new(ipTmp,8080)
 		if tmp.active
