@@ -1,7 +1,7 @@
 RemotePasswordWiFi
 ==================
 
-Script in Ruby, for search passwords WiFi of remote routers. 
+Get Password in remote Routers thanks to the vulnearbility in passwords in this.
 
 Support Routers:
 
