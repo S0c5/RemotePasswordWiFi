@@ -1,14 +1,14 @@
 RemotePasswordWiFi
 ==================
 
-Get Password in remote Routers thanks to the vulnearbility in passwords in this.
+Get Password in remote routers thanks to default passwords.
 
 Support Routers:
 
- *] Thomson
- *] Thechnicolor
+ * Thomson
+ * Thechnicolor
 
 in next days: 
 
- *] bee
- *] cisco
+ * bee
+ * cisco
